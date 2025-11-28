@@ -25,12 +25,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          cache-disabled: true
+          cache-disabled: true  # Deshabilitar caché temporalmente ya que anda fallando el cache de github actions
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: |
-          chmod +x gradlew
-          ./gradlew buildZip
+        run: ./gradlew buildZip --no-daemon
 
       - name: Verify build
         run: |
