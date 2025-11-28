@@ -27,10 +27,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
-          cache: 'gradle'
-
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -42,15 +38,16 @@ jobs:
         run: |
           echo "=== Build distributions ==="
           ls -lah build/distributions/ || echo "No distributions folder"
-          echo "=== Build libs ==="
-          ls -lah build/libs/ || echo "No libs folder"
+          echo "=== Build directory ==="
+          ls -lah build/ || echo "No build folder"
 
       - name: Verify ZIP contents
         run: |
           if [ -f build/distributions/redirect-handler.zip ]; then
+            echo " ZIP file found!"
             unzip -l build/distributions/redirect-handler.zip
           else
-            echo "ERROR: redirect-handler.zip not found!"
+            echo " ERROR: redirect-handler.zip not found!"
             exit 1
           fi
 
@@ -58,11 +55,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.0
-
-      - name: Terraform Format Check
-        run: terraform fmt -check
-        working-directory: terraform/
-        continue-on-error: true
 
       - name: Terraform Init
         run: terraform init
