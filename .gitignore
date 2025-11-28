@@ -12,12 +12,23 @@ out/
 *.log
 
 ##############################
+# Gradle
+##############################
+.gradle/
+build/
+# Permitir los archivos del wrapper
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+##############################
 # Terraform
 ##############################
 terraform/.terraform/
 terraform/*.tfstate
-terraform/.tfstate.
+terraform/.tfstate.*
 terraform/*.backup
+terraform/*.tfvars
+terraform/terraform.lock.hcl
 
 ##############################
 # Sistema Operativo
