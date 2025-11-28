@@ -1,0 +1,43 @@
+##############################
+# IntelliJ / JetBrains
+##############################
+.idea/
+*.iml
+out/
+
+##############################
+# Gradle
+##############################
+.gradle/
+build/
+!gradle-wrapper.jar
+
+# Archivos del wrapper generados automáticamente
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
+##############################
+# Java / JVM
+##############################
+*.class
+*.log
+
+##############################
+# Terraform
+##############################
+terraform/.terraform/
+terraform/*.tfstate
+terraform/.tfstate.
+terraform/*.backup
+
+##############################
+# Sistema Operativo
+##############################
+.DS_Store
+Thumbs.db
+
+##############################
+# Otros temporales
+##############################
+*.tmp
+*.swp
