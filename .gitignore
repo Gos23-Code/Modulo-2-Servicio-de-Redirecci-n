@@ -12,10 +12,6 @@ out/
 build/
 !gradle-wrapper.jar
 
-# Archivos del wrapper generados automáticamente
-gradle/wrapper/gradle-wrapper.properties
-gradle/wrapper/gradle-wrapper.jar
-
 ##############################
 # Java / JVM
 ##############################
