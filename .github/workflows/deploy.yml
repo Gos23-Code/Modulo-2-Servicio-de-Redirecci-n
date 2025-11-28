@@ -7,46 +7,77 @@ on:
       - 'src/**'
       - 'build.gradle'
       - 'terraform/**'
+      - 'gradle/**'
+      - 'gradlew*'
+      - '.github/workflows/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'corretto'
+          cache: 'gradle'
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          cache-disabled: true  # Deshabilitar caché temporalmente ya que anda fallando el cache de github actions
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Make gradlew executable
-        run: chmod +x gradlew
+        run: chmod +x ./gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew buildZip --no-daemon
+      - name: Build Lambda ZIP
+        run: ./gradlew clean buildZip --no-daemon --stacktrace --info
 
-      - name: Verify build
+      - name: List build output
         run: |
-          ls -la build/distributions/
-          unzip -l build/distributions/redirect-handler.zip
+          echo "=== Build distributions ==="
+          ls -lah build/distributions/ || echo "No distributions folder"
+          echo "=== Build libs ==="
+          ls -lah build/libs/ || echo "No libs folder"
+
+      - name: Verify ZIP contents
+        run: |
+          if [ -f build/distributions/redirect-handler.zip ]; then
+            unzip -l build/distributions/redirect-handler.zip
+          else
+            echo "ERROR: redirect-handler.zip not found!"
+            exit 1
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+        working-directory: terraform/
+        continue-on-error: true
 
       - name: Terraform Init
         run: terraform init
         working-directory: terraform/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform/
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -out=tfplan
         working-directory: terraform/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -54,7 +85,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
         working-directory: terraform/
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
